@@ -24,6 +24,7 @@ import com.termux.app.TermuxActivity;
 import com.termux.shared.termux.terminal.TermuxTerminalSessionClientBase;
 import com.termux.shared.termux.TermuxConstants;
 import com.termux.app.TermuxService;
+import com.termux.app.terminal.suggestion.CommandSuggestionController;
 import com.termux.shared.termux.settings.properties.TermuxPropertyConstants;
 import com.termux.shared.termux.terminal.io.BellHandler;
 import com.termux.shared.logger.Logger;
@@ -46,12 +47,15 @@ public class TermuxTerminalSessionActivityClient extends TermuxTerminalSessionCl
 
     private SoundPool mBellSoundPool;
 
+    private final CommandSuggestionController mCommandSuggestionController;
+
     private int mBellSoundId;
 
     private static final String LOG_TAG = "TermuxTerminalSessionActivityClient";
 
     public TermuxTerminalSessionActivityClient(TermuxActivity activity) {
         this.mActivity = activity;
+        mCommandSuggestionController = new CommandSuggestionController(activity);
     }
 
     /**
@@ -73,6 +77,7 @@ public class TermuxTerminalSessionActivityClient extends TermuxTerminalSessionCl
             setCurrentSession(getCurrentStoredSessionOrLast());
             termuxSessionListNotifyUpdated();
         }
+        mCommandSuggestionController.onSessionChanged();
 
         // The current terminal session may have changed while being away, force
         // a refresh of the displayed terminal.
@@ -102,6 +107,7 @@ public class TermuxTerminalSessionActivityClient extends TermuxTerminalSessionCl
         // Bell is not played in background anyways
         // Related: https://stackoverflow.com/a/28708351/14686958
         releaseBellSoundPool();
+        mCommandSuggestionController.dismiss();
     }
 
     /**
@@ -122,6 +128,11 @@ public class TermuxTerminalSessionActivityClient extends TermuxTerminalSessionCl
     }
 
     @Override
+    public void onOutput(@NonNull TerminalSession session, @NonNull byte[] data, int count) {
+        mCommandSuggestionController.onOutput(session, data, count);
+    }
+
+    @Override
     public void onTitleChanged(@NonNull TerminalSession updatedSession) {
         if (!mActivity.isVisible()) return;
 
@@ -137,6 +148,7 @@ public class TermuxTerminalSessionActivityClient extends TermuxTerminalSessionCl
 
     @Override
     public void onSessionFinished(@NonNull TerminalSession finishedSession) {
+        mCommandSuggestionController.onSessionFinished(finishedSession);
         TermuxService service = mActivity.getTermuxService();
 
         if (service == null || service.wantsToStop()) {
@@ -294,6 +306,7 @@ public class TermuxTerminalSessionActivityClient extends TermuxTerminalSessionCl
         if (session == null) return;
 
         if (mActivity.getTerminalView().attachSession(session)) {
+            mCommandSuggestionController.onSessionChanged();
             // notify about switched session if not already displaying the session
             notifyOfSessionChange();
         }

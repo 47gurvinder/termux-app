@@ -12,6 +12,13 @@ public interface TerminalSessionClient {
 
     void onTextChanged(@NonNull TerminalSession changedSession);
 
+    /**
+     * Called with bytes read from the subprocess before they are processed by the terminal emulator.
+     * The byte array is owned by {@link TerminalSession} and must not be retained or modified.
+     */
+    default void onOutput(@NonNull TerminalSession session, @NonNull byte[] data, int count) {
+    }
+
     void onTitleChanged(@NonNull TerminalSession changedSession);
 
     void onSessionFinished(@NonNull TerminalSession finishedSession);

@@ -235,4 +235,17 @@
     <!-- Donate Preference -->
     <string name="donate_preference_title">Donate</string>
 
+    <!-- Command Suggestions -->
+    <string name="title_command_suggestions">Suggested commands</string>
+    <string name="action_insert_command">Insert</string>
+    <string name="action_insert_command_description">Insert %1$s</string>
+    <string name="action_remove_command_suggestion">Remove suggestion</string>
+    <string name="action_remove_command_suggestion_description">Remove %1$s suggestion</string>
+    <string name="action_open_command_suggestions">Open suggested commands</string>
+    <string name="action_close_command_suggestions">Close suggested commands</string>
+    <plurals name="command_suggestions_available_description">
+        <item quantity="one">1 suggested command available. Open suggested commands.</item>
+        <item quantity="other">%1$d suggested commands available. Open suggested commands.</item>
+    </plurals>
+
 </resources>
